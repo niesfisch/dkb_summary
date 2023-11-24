@@ -8,6 +8,7 @@ import de.marcelsauer.bank.domain.TransactionRepository;
 import de.marcelsauer.bank.domain.filter.FilterTransactionsExclude;
 import de.marcelsauer.bank.domain.group.Group;
 import de.marcelsauer.bank.domain.group.GroupByAuftraggeberBeguenstigter;
+import de.marcelsauer.bank.domain.group.GroupByBuchungstext;
 import de.marcelsauer.bank.domain.group.GroupByEinnahmenAusgaben;
 import de.marcelsauer.bank.domain.group.GroupByMonthAndYear;
 import de.marcelsauer.bank.domain.group.GroupByRegexMatcher;
@@ -42,6 +43,7 @@ public class Dkb {
   private static final String GROUPED_BY_MONTH_CSV_FILE_NAME = "grouped_by_month_year.csv";
   private static final String GROUPED_BY_REGEX_CSV_FILE_NAME = "grouped_by_regex.csv";
   private static final String GROUPED_BY_AUFTRAGGEBER_OR_BEGUESTIGTER = "grouped_by_auftraggeber_or_beguenstigter.csv";
+  private static final String GROUPED_BY_BUCHUNGSTEXT = "grouped_by_buchungstext.csv";
   private static final String EINNAHMEN_CSV_FILE_NAME = "money_received.csv";
   private static final String AUSGABEN_CSV_FILE_NAME = "money_spent.csv";
 
@@ -74,9 +76,13 @@ public class Dkb {
     Collection<Transaction> rawTransactions = transactionRepository.load();
 
     // filter out stuff we do not need
-    Collection<Transaction> withoutExcluded = new FilterTransactionsExclude(rawTransactions, config.excludeFilters).filter();
+    Collection<Transaction> withoutExcluded = new FilterTransactionsExclude(
+        rawTransactions,
+        config.excludeFilters
+    ).filter();
 
-    saveAuftraggeberOrBeguenstigterToCsvFile(withoutExcluded);
+    saveBuchungstextToCsvFile(withoutExcluded);
+    savePerAuftraggeberOrBeguenstigterToCsvFile(withoutExcluded);
     saveEinnahmenAusgabenToCsvFile(withoutExcluded);
     savePerMonthToCsvFile(withoutExcluded);
     savePerRegexGroupToCsvFile(withoutExcluded);
@@ -85,30 +91,34 @@ public class Dkb {
   }
 
   private void savePerRegexGroupToCsvFile(Collection<Transaction> transactions) {
-    GroupByRegexMatcher groupByRegexMatcher = new GroupByRegexMatcher(transactions, config.groupRegexMatchers);
-    GroupedTransactions grouped = groupByRegexMatcher.get();
-    writeToFile(txGroupedByEinnahmenAusgabenToCsv(grouped), outDir + GROUPED_BY_REGEX_CSV_FILE_NAME);
+    GroupedTransactions grouped = new GroupByRegexMatcher(transactions, config.groupRegexMatchers).get();
+    writeToFile(einnahmenAusgabenAnzahlTxCsv(grouped), outDir + GROUPED_BY_REGEX_CSV_FILE_NAME);
   }
 
   private void savePerMonthToCsvFile(Collection<Transaction> transactions) {
     GroupedTransactions grouped = new GroupByMonthAndYear(transactions).get();
-    writeToFile(txGroupedByEinnahmenAusgabenToCsv(grouped), outDir + GROUPED_BY_MONTH_CSV_FILE_NAME);
+    writeToFile(einnahmenAusgabenAnzahlTxCsv(grouped), outDir + GROUPED_BY_MONTH_CSV_FILE_NAME);
   }
 
-  private String txGroupedByEinnahmenAusgabenToCsv(GroupedTransactions grouped) {
+  private void savePerAuftraggeberOrBeguenstigterToCsvFile(Collection<Transaction> transactions) {
+    GroupedTransactions grouped = new GroupByAuftraggeberBeguenstigter(transactions).get();
+    writeToFile(einnahmenAusgabenAnzahlTxCsv(grouped), outDir + GROUPED_BY_AUFTRAGGEBER_OR_BEGUESTIGTER);
+  }
+
+  private void saveBuchungstextToCsvFile(Collection<Transaction> transactions) {
+    GroupedTransactions grouped = new GroupByBuchungstext(transactions).get();
+    writeToFile(einnahmenAusgabenAnzahlTxCsv(grouped), outDir + GROUPED_BY_BUCHUNGSTEXT);
+  }
+
+  private String einnahmenAusgabenAnzahlTxCsv(GroupedTransactions grouped) {
     StringBuilder sb = new StringBuilder();
-    sb.append("Gruppe;Einnahmen;Ausgaben\n");
+    sb.append("Gruppe;Einnahmen;Ausgaben;Anzahl Transaktionen\n");
     for (Group group : grouped.transactionsByGroup().keySet()) {
-      EinnahmenAusgaben summary = new EinnahmenAusgaben(grouped.transactionsByGroup().get(group));
-      sb.append("%s;%s;%s%n".formatted(group.name(), summary.einnahmen(), summary.ausgaben()));
+      Collection<Transaction> transactions = grouped.transactionsByGroup().get(group);
+      EinnahmenAusgaben summary = new EinnahmenAusgaben(transactions);
+      sb.append("%s;%s;%s;%s%n".formatted(group.name(), summary.einnahmen(), summary.ausgaben(), transactions.size()));
     }
     return sb.toString();
-  }
-
-  private void saveAuftraggeberOrBeguenstigterToCsvFile(Collection<Transaction> transactions) {
-    GroupedTransactions groupedByEinnahmenAusgaben = new GroupByAuftraggeberBeguenstigter(transactions).get();
-    String groupedByEinnahmenAusgabenPerBeguenstigerOrAuftraggeber = txGroupedByEinnahmenAusgabenToCsv(groupedByEinnahmenAusgaben);
-    writeToFile(groupedByEinnahmenAusgabenPerBeguenstigerOrAuftraggeber, outDir + GROUPED_BY_AUFTRAGGEBER_OR_BEGUESTIGTER);
   }
 
   private void saveEinnahmenAusgabenToCsvFile(Collection<Transaction> transactions) {
