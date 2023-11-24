@@ -33,9 +33,10 @@ public class Dkb {
   // directory where to write the results to
   public static final String OUT_DIR = "/home/msauer/dev/workspace-private/dkb_resourcen/results/";
 
-  // do not change below unless you know what you are doing
-
-  // logger
+  /*********************************************
+   * do not change anything below unless
+   * you know what you are doing
+   *********************************************/
   private static final Logger LOG = LoggerFactory.getLogger(Dkb.class);
 
   private static final String GROUPED_BY_MONTH_CSV_FILE_NAME = "grouped_by_month_year.csv";
