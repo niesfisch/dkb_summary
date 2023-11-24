@@ -27,9 +27,9 @@ public class Dkb {
    * change to your values
    *********************************************/
   // the file you have downloaded from dkb
-  public static final String DKB_INPUT_CSV = "/home/msauer/dev/workspace-private/dkb_resourcen/dkb_gemeinsam_2021_2022.csv";
+  public static final String DKB_INPUT_CSV = "/home/msauer/dev/workspace-private/dkb_resourcen/dkb_2022.csv";
   // config file
-  public static final String CONFIG_FILE = "/home/msauer/dev/workspace-private/dkb_resourcen/gemeinsam.config";
+  public static final String CONFIG_FILE = "/home/msauer/dev/workspace-private/dkb_resourcen/config.properties";
   // directory where to write the results to
   public static final String OUT_DIR = "/home/msauer/dev/workspace-private/dkb_resourcen/results/";
 
