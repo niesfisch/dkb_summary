@@ -1,4 +1,4 @@
-# Deutsche Kreditbank (DKB) Account Summary ![Build](https://github.com/niesfisch/dkb_summary/actions/workflows/build.yml/badge.svg)
+# Deutsche Kreditbank (DKB) Account Summary ![Build](https://github.com/niesfisch/dkb_summary/actions/workflows/build_and_test.yml/badge.svg)
 
 This project is a simple tool to generate csv files (statistics) from your DKB account statements (=input csv).
 
