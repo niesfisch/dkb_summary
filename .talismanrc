@@ -1,0 +1,6 @@
+fileignoreconfig:
+- filename: src/main/java/de/marcelsauer/bank/domain/group/GroupedTransactions.java
+  checksum: 76a97aadfcf87c94d566e524d4829a1b1320c765ccf90fa420c3058d29377f69
+- filename: src/test/java/de/marcelsauer/bank/adapter/dkb/DkbScenarioTest.java
+  checksum: bb2f247909958a963d553fcaad46f0a9f4851022aab298472fcb1e7594680fd2
+version: "1.0"
