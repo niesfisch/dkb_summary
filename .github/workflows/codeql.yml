@@ -43,7 +43,7 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Compile project
-      run: ./mvnw -ntp clean package -DskipTests=true
+      run: mvn -ntp clean package -DskipTests=true
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
